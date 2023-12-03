@@ -1,57 +1,92 @@
 const express = require('express');
 const router = express.Router();
+const test = require("../models/testModel");
 
-const products = [
-    {id: 1, name: "John"},
-    {id: 2, name: "Jane"},
-    {id: 3, name: "Jack"},
-];
 
-router.get("/", function (req, res) {
-    res.send("Employees");
-});
-router.get("/search", function (req, res) {
-    res.send("Employee Search");
-});
-
-router.get("/employees", function (req, res) {
-    res.send(products);
-});
-
-router.get("/employees/:index", function (req, res) {
-    const index = req.params.index;
-    if (!products[index]) {
-        return res.status(400).send("Employee not found");
+router.get("/employees", async function (req, res) {
+    try {
+        const testMan = await test.find();
+        res.status(200).json({
+            success: true,
+            testMan
+        });
+    } catch (error) {
+        res.status(400).send(error.message);
     }
-    const productObject = products[index];
-    res.send(productObject);
 });
 
-router.put("/employees/:index", function (req, res) {
-    const index = req.params.index;
-    if (!products[index]) {
-        return res.status(400).send("Employee not found");
-    }
+router.get("/employees/:id", async function (req, res) {
+    try {
+        const ID = req.params.id;
+        const testMan = await test.findById(ID);
 
-    products[index] = req.body;
-    res.send(products[index]);
-});
-
-router.delete("/employees/:index", function (req, res) {
-    const index = req.params.index;
-    if (!products[index]) {
-        return res.status(400).send("Employee not found");
+        if (!testMan) {
+            return res.status(400).send("Employee not found");
+        }
+        else {
+            res.status(200).json({
+                success: true,
+                testMan
+            });
+        }
+    } catch (error) {
+        res.status(400).send(error.message);
     }
 
-    products.splice(index, 1);
-    res.send(products);
+
 });
 
-router.post("/employee", function (req, res) {
-    const newProduct = req.body;
-    const lastIndex = Object.keys(products).length;
-    products[lastIndex] = newProduct;
-    res.send(products[lastIndex]);
+router.put("/employees/:id", async function (req, res) {
+    try {
+        const ID = req.params.id;
+        const testMan = await test.findByIdAndUpdate(ID, req.body, { new: true });
+
+        if (!testMan) {
+            return res.status(400).send("Employee not found");
+        }
+
+        res.status(200).json({
+            success: true,
+            testMan
+        });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+
+});
+
+router.delete("/employees/:id",async function (req, res) {
+
+    try {
+        const ID = req.params.id;
+        const testMan = await test.findByIdAndDelete(ID);
+
+        if (!testMan) {
+            return res.status(400).send("Employee not found");
+        }
+
+        res.status(200).json({
+            success: true,
+            testMan
+        });
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
+
+});
+
+router.post("/employee", async function (req, res) {
+    try {
+        const testMan = await test.create(req.body);
+
+        res.status(201).json({
+            success: true,
+            testMan
+        });
+
+    } catch (error) {
+        res.status(400).send(error.message);
+    }
 });
 
 module.exports = router;
